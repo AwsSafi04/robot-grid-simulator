@@ -30,7 +30,30 @@ pip install flask flask-cors
 
 ```
 ## Setup
-Clone the repository
+1)Clone the repository
 ```bash
 git clone https://github.com/AwsSafi04/robot-grid-simulator.git
 cd robot-grid-simulator
+
+```
+2)Set up virtual environment
+```bash
+# Windows
+python -m venv robot_env
+robot_env\Scripts\activate
+
+# macOS/Linux
+python3 -m venv robot_env
+source robot_env/bin/activate
+
+```
+3)Install dependencies
+```bash
+pip install -r requirements.txt
+
+```
+## Running the Simulator
+- **Command-Line Version**
+  ```bash
+  python robot_simulator.py
+
