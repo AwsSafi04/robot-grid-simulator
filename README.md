@@ -54,5 +54,9 @@ Enter command: forward     # Move 1 step in the current direction
 Enter command: backward    # Move 1 step in the opposite direction
 Enter command: left        # Turn 90° counter-clockwise
 Enter command: right       # Turn 90° clockwise
+Enter command: diagonal ne    # Move northeast (up-right)
+Enter command: diagonal nw    # Move northwest (up-left)
+Enter command: diagonal se    # Move southeast (down-right)
+Enter command: diagonal sw    # Move southwest (down-left)
 
 
