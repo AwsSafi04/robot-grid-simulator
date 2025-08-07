@@ -47,7 +47,7 @@ def execute_command():
         data = request.get_json()
         command = data.get('command', '').lower()
         
-        print(f"🤖 Executing command: {command}")  # Debug log
+        print(f"Executing command: {command}")  # Debug log
         
         if command == 'forward':
             result = robot.forward()
@@ -69,7 +69,7 @@ def execute_command():
                 'message': f'Unknown command: {command}'
             })
         
-        print(f"🤖 Result: {result}")  # Debug log
+        print(f"Result: {result}")  # Debug log
         
         # Return result with current status
         return jsonify({
@@ -86,7 +86,7 @@ def execute_command():
         })
         
     except Exception as e:
-        print(f"❌ Error: {str(e)}")  # Debug log
+        print(f"Error: {str(e)}")  # Debug log
         return jsonify({
             'success': False,
             'message': f'Error: {str(e)}'
@@ -259,4 +259,5 @@ if __name__ == '__main__':
     print("Open your browser to: http://localhost:5000")
     print("Watch this console for robot command logs!")
     print("=" * 50)
+
     app.run(debug=True, host='0.0.0.0', port=5000)
