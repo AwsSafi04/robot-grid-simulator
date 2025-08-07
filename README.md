@@ -18,6 +18,7 @@ This simulator provides hands-on experience in several core areas of robotics an
 Make sure you have the following installed on your system:
 
 - **Python 3.7+**
+- **Git**
 - **Web browser** (for viewing the web interface)
 - **(Optional)**: `Flask` and `Flask-CORS`  
   *Only required if you're running the web version*
@@ -28,35 +29,8 @@ To install Flask and Flask-CORS:
 pip install flask flask-cors
 
 ```
-Option 1: Command-Line Interface (Required)
-Run the simulator directly from the terminal:
+## Setup
+Clone the repository
 ```bash
-# Clone the repository
 git clone https://github.com/AwsSafi04/robot-grid-simulator.git
 cd robot-grid-simulator
-
-# Run the command-line simulator
-python3 robot_simulator.py
-
-```
-##  How to Make Your Robot Move
-
-### Method 1: Command-Line Controls
-
-Start the simulator by running:
-
-```bash
-python3 robot_simulator.py
-
-```
-```bash
-Enter command: forward     # Move 1 step in the current direction
-Enter command: backward    # Move 1 step in the opposite direction
-Enter command: left        # Turn 90° counter-clockwise
-Enter command: right       # Turn 90° clockwise
-Enter command: diagonal ne    # Move northeast (up-right)
-Enter command: diagonal nw    # Move northwest (up-left)
-Enter command: diagonal se    # Move southeast (down-right)
-Enter command: diagonal sw    # Move southwest (down-left)
-
-
