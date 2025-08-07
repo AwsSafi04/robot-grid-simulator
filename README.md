@@ -56,4 +56,12 @@ pip install -r requirements.txt
 - **Command-Line Version**
   ```bash
   python robot_simulator.py
+- **Web Version**
+  ```bash
+  python app.py
+
+  ```
+  Open http://localhost:5000 in your browser.
+  Use buttons or keyboard to control the robot.
+  
 
