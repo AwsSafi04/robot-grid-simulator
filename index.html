@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Grid Simulator - Connected to Python Backend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .connection-status {
+            background: #27AE60;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .connection-status.disconnected {
+            background: #E74C3C;
+        }
+
+        /* MAIN CONTAINER - ORGANIZED LAYOUT */
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* TOP ROW BUTTONS */
+        .top-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* MIDDLE ROW - GRID WITH SIDE BUTTONS */
+        .middle-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .left-buttons, .right-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* BOTTOM ROWS BUTTONS */
+        .bottom-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .obstacle-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* GRID IN CENTER */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 70px);
+            grid-template-rows: repeat(5, 70px);
+            gap: 2px;
+            background: #333;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .cell {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .cell.clickable {
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .cell.clickable:hover {
+            border-color: #3498db;
+            transform: scale(1.05);
+        }
+
+        .cell.clickable.empty:hover {
+            background: #e8f4f8;
+            border-color: #E74C3C;
+        }
+
+        .cell.clickable.obstacle:hover {
+            background: #f8e8e8;
+            border-color: #27AE60;
+        }
+
+        .cell.empty {
+            background: #f8f8f8;
+            color: #ccc;
+        }
+
+        .cell.robot {
+            background: #27AE60;
+            color: white;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 15px rgba(39, 174, 96, 0.5);
+        }
+
+        .cell.obstacle {
+            background: #E74C3C;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* BUTTONS STYLES */
+        .btn {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            color: white;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Movement buttons - Blue */
+        .btn-move { background: #4A90E2; }
+        .btn-move:hover { background: #357ABD; }
+
+        /* Direction buttons - Purple */
+        .btn-dir { background: #8E44AD; }
+        .btn-dir:hover { background: #732D91; }
+
+        /* Diagonal buttons - Orange */
+        .btn-diag { background: #E67E22; }
+        .btn-diag:hover { background: #D35400; }
+
+        /* Action buttons - Green */
+        .btn-action { background: #27AE60; }
+        .btn-action:hover { background: #229954; }
+
+        /* Obstacle buttons - Red */
+        .btn-obstacle { background: #E74C3C; }
+        .btn-obstacle:hover { background: #C0392B; }
+
+        /* SIMPLE DASHBOARD UNDER GRID */
+        .dashboard {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .dashboard h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .status-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .status-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .battery-section {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .battery-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .battery-fill {
+            height: 100%;
+            background: #27AE60;
+            transition: all 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .battery-low {
+            background: #E74C3C;
+        }
+
+        .messages {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 8px;
+            height: 80px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 11px;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 3px;
+        }
+
+        .msg-success { color: #2ecc71; }
+        .msg-error { color: #e74c3c; }
+        .msg-info { color: #3498db; }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            .game-area {
+                transform: scale(0.85);
+            }
+            
+            .btn {
+                padding: 8px 10px;
+                font-size: 11px;
+                min-width: 60px;
+            }
+            
+            .status-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Robot Grid Simulator</h1>
+    <p style="text-align: center; color: #666; margin-bottom: 20px;">V18 - Connected to Python Backend via Flask</p>
+    
+    <div class="connection-status" id="connectionStatus">
+        🔄 Connecting to Python Backend...
+    </div>
+    
+    <!-- CLEAN ORGANIZED LAYOUT -->
+    <div class="game-area">
+        <!-- TOP ROW: JUST NORTH -->
+        <div class="top-buttons">
+            <button class="btn btn-dir" onclick="turnToDirection('NORTH')">⬆ NORTH</button>
+        </div>
+
+        <!-- TOP MOVEMENT ROW: JUST FORWARD -->
+        <div class="top-buttons">
+            <button class="btn btn-move" onclick="executeCommand('forward')">↑ FORWARD</button>
+        </div>
+
+        <!-- MIDDLE ROW: LEFT BUTTONS + GRID + RIGHT BUTTONS -->
+        <div class="middle-row">
+            <div class="left-buttons">
+                <button class="btn btn-dir" onclick="turnToDirection('WEST')">⬅ WEST</button>
+                <button class="btn btn-move" onclick="executeCommand('left')">← LEFT</button>
+            </div>
+
+            <!-- GRID WITH DIAGONAL BUTTONS ON EDGES -->
+            <div style="position: relative;">
+                <!-- DIAGONAL BUTTONS AT GRID EDGES -->
+                <button class="btn btn-diag" style="position: absolute; top: -15px; left: -15px; z-index: 10; min-width: 60px; padding: 8px;" onclick="executeDiagonal('nw')">↖ NW</button>
+                <button class="btn btn-diag" style="position: absolute; top: -15px; right: -15px; z-index: 10; min-width: 60px; padding: 8px;" onclick="executeDiagonal('ne')">↗ NE</button>
+                <button class="btn btn-diag" style="position: absolute; bottom: -15px; left: -15px; z-index: 10; min-width: 60px; padding: 8px;" onclick="executeDiagonal('sw')">↙ SW</button>
+                <button class="btn btn-diag" style="position: absolute; bottom: -15px; right: -15px; z-index: 10; min-width: 60px; padding: 8px;" onclick="executeDiagonal('se')">↘ SE</button>
+                
+                <div class="grid" id="robotGrid"></div>
+            </div>
+
+            <div class="right-buttons">
+                <button class="btn btn-dir" onclick="turnToDirection('EAST')">➡ EAST</button>
+                <button class="btn btn-move" onclick="executeCommand('right')">→ RIGHT</button>
+            </div>
+        </div>
+
+        <!-- BOTTOM MOVEMENT ROW: JUST BACK -->
+        <div class="bottom-buttons">
+            <button class="btn btn-move" onclick="executeCommand('backward')">↓ BACK</button>
+        </div>
+
+        <!-- BOTTOM ROW: JUST SOUTH -->
+        <div class="bottom-buttons">
+            <button class="btn btn-dir" onclick="turnToDirection('SOUTH')">⬇ SOUTH</button>
+        </div>
+
+        <!-- OBSTACLE CONTROLS -->
+        <div class="obstacle-buttons">
+            <button class="btn btn-obstacle" onclick="toggleObstacleMode()">
+                <span id="obstacleMode">🎯 EDIT</span>
+            </button>
+            <button class="btn btn-obstacle" onclick="clearAllObstacles()">🗑️ CLEAR</button>
+            <button class="btn btn-obstacle" onclick="resetObstacles()">↺ DEFAULT</button>
+        </div>
+
+        <!-- ACTION CONTROLS - MOVED FROM TOP -->
+        <div class="obstacle-buttons">
+            <button class="btn btn-action" onclick="executeCommand('recharge')">🔋 CHARGE</button>
+            <button class="btn btn-action" onclick="executeCommand('reset')">🔄 RESET</button>
+            <button class="btn btn-action" onclick="showReport()">📊 REPORT</button>
+        </div>
+    </div>
+
+    <!-- SIMPLE DASHBOARD UNDER GRID -->
+    <div class="dashboard">
+        <h3>📊 Robot Status (Python Backend)</h3>
+        
+        <div class="status-row">
+            <div class="status-item">
+                <div class="status-label">POSITION</div>
+                <div class="status-value" id="position">(0, 0)</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">FACING</div>
+                <div class="status-value" id="direction">NORTH</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">MOVES</div>
+                <div class="status-value" id="moveCount">0</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">BATTERY</div>
+                <div class="status-value" id="batteryText">100%</div>
+            </div>
+        </div>
+
+        <div class="battery-section">
+            <div class="battery-bar">
+                <div class="battery-fill" id="batteryFill" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <div class="messages" id="messagePanel">
+            <div class="msg-info">🔗 Connecting to Python backend...</div>
+        </div>
+    </div>
+
+    <script>
+        let obstacleEditMode = false;
+        let robotData = {
+            x: 0, y: 0, facing: 'NORTH', battery: 100, 
+            moveCount: 0, obstacles: [[2, 2], [3, 4], [1, 3]]
+        };
+
+        // API Communication Functions
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                console.log(`🌐 API Call: ${method} /api/${endpoint}`, data);
+                const response = await fetch(`/api/${endpoint}`, options);
+                const result = await response.json();
+                console.log(`🌐 API Response:`, result);
+                
+                updateConnectionStatus(true);
+                return result;
+            } catch (error) {
+                updateConnectionStatus(false);
+                console.error('API Error:', error);
+                return { success: false, message: `Connection error: ${error.message}` };
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
+            if (connected) {
+                status.textContent = '🟢 Connected to Python Backend';
+                status.className = 'connection-status';
+            } else {
+                status.textContent = '🔴 Disconnected from Python Backend';
+                status.className = 'connection-status disconnected';
+            }
+        }
+
+        // UI Update Functions
+        function updateGrid() {
+            const grid = document.getElementById('robotGrid');
+            grid.innerHTML = '';
+
+            for (let y = 4; y >= 0; y--) {
+                for (let x = 0; x < 5; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    // Add click functionality for obstacle editing
+                    if (obstacleEditMode) {
+                        cell.className += ' clickable';
+                        cell.onclick = () => toggleObstacle(x, y);
+                    }
+                    
+                    if (x === robotData.x && y === robotData.y) {
+                        cell.className += ' robot';
+                        const symbols = { 'NORTH': '↑', 'EAST': '→', 'SOUTH': '↓', 'WEST': '←' };
+                        cell.textContent = symbols[robotData.facing];
+                    } else if (robotData.obstacles.some(obs => obs[0] === x && obs[1] === y)) {
+                        cell.className += ' obstacle';
+                        cell.textContent = '⚫';
+                        if (obstacleEditMode) {
+                            cell.title = 'Click to remove obstacle';
+                        }
+                    } else {
+                        cell.className += ' empty';
+                        cell.textContent = '·';
+                        if (obstacleEditMode) {
+                            cell.title = 'Click to add obstacle';
+                        }
+                    }
+                    
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function updateStatus() {
+            document.getElementById('position').textContent = `(${robotData.x}, ${robotData.y})`;
+            document.getElementById('direction').textContent = robotData.facing;
+            document.getElementById('batteryText').textContent = `${robotData.battery}%`;
+            document.getElementById('moveCount').textContent = robotData.moveCount;
+            
+            const batteryFill = document.getElementById('batteryFill');
+            batteryFill.style.width = `${robotData.battery}%`;
+            batteryFill.className = robotData.battery <= 20 ? 'battery-fill battery-low' : 'battery-fill';
+        }
+
+        function addMessage(message, type = 'info') {
+            const messagePanel = document.getElementById('messagePanel');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `msg-${type}`;
+            messageDiv.textContent = `> ${message}`;
+            
+            messagePanel.appendChild(messageDiv);
+            messagePanel.scrollTop = messagePanel.scrollHeight;
+            
+            const messages = messagePanel.children;
+            if (messages.length > 8) {
+                messagePanel.removeChild(messages[0]);
+            }
+        }
+
+        // Command Functions - Now call Python backend!
+        async function executeCommand(command) {
+            addMessage(`Sending command: ${command}`, 'info');
+            const result = await apiCall('command', 'POST', { command });
+            
+            if (result.success) {
+                if (result.data) {
+                    robotData = { ...robotData, ...result.data };
+                }
+                addMessage(result.message, 'success');
+            } else {
+                addMessage(result.message, 'error');
+            }
+            
+            updateGrid();
+            updateStatus();
+        }
+
+        async function executeDiagonal(direction) {
+            addMessage(`Sending diagonal: ${direction}`, 'info');
+            const result = await apiCall('diagonal', 'POST', { direction });
+            
+            if (result.success) {
+                if (result.data) {
+                    robotData = { ...robotData, ...result.data };
+                }
+                addMessage(result.message, 'success');
+            } else {
+                addMessage(result.message, 'error');
+            }
+            
+            updateGrid();
+            updateStatus();
+        }
+
+        async function turnToDirection(direction) {
+            addMessage(`Turning to: ${direction}`, 'info');
+            const result = await apiCall('turn', 'POST', { direction });
+            
+            if (result.success) {
+                if (result.data) {
+                    robotData = { ...robotData, ...result.data };
+                }
+                addMessage(result.message, 'success');
+            } else {
+                addMessage(result.message, 'error');
+            }
+            
+            updateGrid();
+            updateStatus();
+        }
+
+        async function showReport() {
+            addMessage('Requesting status report...', 'info');
+            const result = await apiCall('report');
+            
+            if (result.success) {
+                const reportLines = result.message.split('\n');
+                reportLines.forEach(line => {
+                    addMessage(line, 'info');
+                });
+            } else {
+                addMessage(result.message, 'error');
+            }
+        }
+
+        // Obstacle Editing Functions
+        function toggleObstacleMode() {
+            obstacleEditMode = !obstacleEditMode;
+            const modeText = document.getElementById('obstacleMode');
+            
+            if (obstacleEditMode) {
+                modeText.textContent = '🎯 ON';
+                modeText.parentElement.style.background = '#E67E22';
+                addMessage('Obstacle edit mode ENABLED', 'info');
+            } else {
+                modeText.textContent = '🎯 EDIT';
+                modeText.parentElement.style.background = '#E74C3C';
+                addMessage('Obstacle edit mode DISABLED', 'info');
+            }
+            
+            updateGrid();
+        }
+
+        async function toggleObstacle(x, y) {
+            if (!obstacleEditMode) return;
+            
+            addMessage(`Toggling obstacle at (${x}, ${y})`, 'info');
+            const result = await apiCall('obstacles', 'POST', { 
+                action: 'toggle', 
+                x: x, 
+                y: y 
+            });
+            
+            if (result.success) {
+                if (result.data && result.data.obstacles) {
+                    robotData.obstacles = result.data.obstacles;
+                }
+                addMessage(result.message, 'success');
+            } else {
+                addMessage(result.message, 'error');
+            }
+            
+            updateGrid();
+        }
+
+        async function clearAllObstacles() {
+            addMessage('Clearing all obstacles...', 'info');
+            const result = await apiCall('obstacles', 'POST', { action: 'clear' });
+            
+            if (result.success) {
+                if (result.data && result.data.obstacles) {
+                    robotData.obstacles = result.data.obstacles;
+                }
+                addMessage(result.message, 'success');
+            } else {
+                addMessage(result.message, 'error');
+            }
+            
+            updateGrid();
+        }
+
+        async function resetObstacles() {
+            addMessage('Resetting obstacles...', 'info');
+            const result = await apiCall('obstacles', 'POST', { action: 'reset' });
+            
+            if (result.success) {
+                if (result.data && result.data.obstacles) {
+                    robotData.obstacles = result.data.obstacles;
+                }
+                addMessage(result.message, 'success');
+            } else {
+                addMessage(result.message, 'error');
+            }
+            
+            updateGrid();
+        }
+
+        // Keyboard Controls
+        document.addEventListener('keydown', function(event) {
+            switch(event.key.toLowerCase()) {
+                case 'w': case 'arrowup':    executeCommand('forward'); break;
+                case 's': case 'arrowdown':  executeCommand('backward'); break;
+                case 'a': case 'arrowleft':  executeCommand('left'); break;
+                case 'd': case 'arrowright': executeCommand('right'); break;
+                case 'q': executeDiagonal('nw'); break;
+                case 'e': executeDiagonal('ne'); break;
+                case 'z': executeDiagonal('sw'); break;
+                case 'c': executeDiagonal('se'); break;
+                case 'r': executeCommand('recharge'); break;
+                case 'o': toggleObstacleMode(); break;
+                case 'x': clearAllObstacles(); break;
+                case ' ': showReport(); event.preventDefault(); break;
+            }
+        });
+
+        // Initialize - Get initial status from Python backend
+        async function initialize() {
+            addMessage('🔗 Connecting to Python backend...', 'info');
+            
+            const result = await apiCall('status');
+            
+            if (result.success) {
+                robotData = result.data;
+                addMessage('✅ V18 Successfully connected to Python Robot Simulator!', 'success');
+                addMessage('🎮 Use buttons above or keyboard (WASD, QEZC) to control robot', 'info');
+                addMessage('🐍 All commands are processed by your Python code!', 'info');
+            } else {
+                addMessage('❌ Failed to connect to Python backend', 'error');
+                addMessage('Make sure Flask server is running on port 5000', 'error');
+            }
+            
+            updateGrid();
+            updateStatus();
+        }
+
+        // Start the app
+        initialize();
+    </script>
+</body>
+</html>
