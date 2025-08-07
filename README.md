@@ -48,3 +48,11 @@ Start the simulator by running:
 ```bash
 python3 robot_simulator.py
 
+```
+```bash
+Enter command: forward     # Move 1 step in the current direction
+Enter command: backward    # Move 1 step in the opposite direction
+Enter command: left        # Turn 90° counter-clockwise
+Enter command: right       # Turn 90° clockwise
+
+
