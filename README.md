@@ -37,3 +37,14 @@ cd robot-grid-simulator
 
 # Run the command-line simulator
 python3 robot_simulator.py
+
+```
+##  How to Make Your Robot Move
+
+### Method 1: Command-Line Controls
+
+Start the simulator by running:
+
+```bash
+python3 robot_simulator.py
+
