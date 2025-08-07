@@ -26,3 +26,17 @@ To install Flask and Flask-CORS:
 
 ```bash
 pip install flask flask-cors
+
+
+##  Option 1: Command-Line Interface (Required)
+
+Run the simulator directly from the terminal:
+
+```bash
+# Clone the repository
+git clone https://github.com/AwsSafi04/robot-grid-simulator.git
+cd robot-grid-simulator
+
+# Run the command-line simulator
+python3 robot_simulator.py
+
