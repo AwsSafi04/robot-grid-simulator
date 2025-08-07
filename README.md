@@ -63,5 +63,16 @@ pip install -r requirements.txt
   ```
   Open http://localhost:5000 in your browser.
   Use buttons or keyboard to control the robot.
+
+
+## File Structure
+```bash
+robot-grid-simulator/
+├── robot_simulator.py      # Core logic
+├── app.py                  # Flask backend
+├── requirements.txt        # Dependencies
+└── templates/
+    └── index.html          # Web UI
+
   
 
