@@ -32,6 +32,7 @@ pip install flask flask-cors
 
 Run the simulator directly from the terminal:
 
+
 ```bash
 # Clone the repository
 git clone https://github.com/AwsSafi04/robot-grid-simulator.git
